@@ -320,7 +320,7 @@ async def add_habit(
     """Add new habit"""
     import datetime
     
-    max_habit_num = get_max_habit_number_by_user(db, user_id)r
+    max_habit_num = get_max_habit_number_by_user(db, user_id)
     habit_id = f"{user_id}_{max_habit_num + 1}"
     habits_count = get_habits_count_by_user(db, user_id)
     color = get_habit_color(habits_count)
