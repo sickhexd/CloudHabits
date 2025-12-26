@@ -1,0 +1,211 @@
+<div class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold">Reports and Statistics</h2>
+            <select id="period-select" name="period" hx-get="/reports?user_id={{ user_id }}" hx-target="#reports-content" hx-trigger="change" hx-include="[name='period']" hx-params="period" class="bg-white border border-gray-300 rounded px-3 py-1">
+                <option value="7days" {% if period == "7days" %}selected{% endif %}>Last 7 days</option>
+                <option value="30days" {% if period == "30days" %}selected{% endif %}>Last 30 days</option>
+                <option value="week" {% if period == "week" %}selected{% endif %}>This week</option>
+                <option value="month" {% if period == "month" %}selected{% endif %}>This month</option>
+            </select>
+        </div>
+
+        {% if habits %}
+            <!-- Completion Rate -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="mb-4 font-medium">Completion Rate 📋</h3>
+                <div class="space-y-4">
+                    {% for habit in habits %}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full" style="background-color: {{ habit.color }}"></div>
+                                <span>{{ habit.name }}</span>
+                            </div>
+                            <span>{{ habit.completion_rate }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: {{ habit.completion_rate }}%; background-color: {{ habit.color }}"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Completion Streaks -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="mb-4 font-medium">Completion Streaks 📅</h3>
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {% for habit in habits %}
+                    <div class="p-4 rounded-lg border" style="border-color: {{ habit.color }}">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-3 h-3 rounded-full" style="background-color: {{ habit.color }}"></div>
+                            <span>{{ habit.name }}</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div>
+                                <span class="text-gray-600">Current streak: </span>
+                                <span class="font-semibold">{{ habit.current_streak }} days</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Best streak: </span>
+                                <span class="font-semibold">{{ habit.max_streak }} days</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Completion Chart -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="mb-4 font-medium">Completion Chart 📊</h3>
+                <div class="w-full" style="height: 300px;">
+                    <canvas id="completionChart"></canvas>
+                </div>
+            </div>
+
+        {% else %}
+            <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                Add habits to see statistics
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Function to initialize charts
+        function initCharts() {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js is not loaded');
+                setTimeout(initCharts, 100);
+                return;
+            }
+
+            // Use global storage for chart instances
+            if (!window.chartInstances) {
+                window.chartInstances = {};
+            }
+
+            // Function to destroy existing charts
+            function destroyCharts() {
+                if (window.chartInstances.completionChart) {
+                    window.chartInstances.completionChart.destroy();
+                    window.chartInstances.completionChart = null;
+                }
+            }
+
+            // Chart data
+            const chartData = {{ chart_data|tojson }};
+            const habits = {{ habits|tojson }};
+
+            // Destroy old charts before creating new ones
+            destroyCharts();
+
+            // Check for canvas elements before creating charts
+            const completionCanvas = document.getElementById('completionChart');
+
+            if (!completionCanvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+
+            if (!habits || habits.length === 0) {
+                console.log('No habits to display');
+                return;
+            }
+
+            if (!chartData || chartData.length === 0) {
+                console.log('No chart data available');
+                return;
+            }
+
+            // Completion chart (Line Chart) - shows total completed habits per day
+            const completionCtx = completionCanvas.getContext('2d');
+            const maxHabits = habits.length;
+            window.chartInstances.completionChart = new Chart(completionCtx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(d => d.date),
+                    datasets: [{
+                        label: 'Total Completed Habits',
+                        data: chartData.map(d => d.total_completed || 0),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Completed: ${context.parsed.y} / ${maxHabits} habits`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                drawBorder: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: maxHabits > 0 ? maxHabits : 1,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            },
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                drawBorder: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        // Initialize charts after DOM load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCharts);
+        } else {
+            // DOM already loaded or content loaded via HTMX
+            // Use small delay to ensure elements are in DOM
+            setTimeout(initCharts, 50);
+        }
+
+        // Also handle HTMX event for chart updates
+        if (typeof htmx !== 'undefined') {
+            document.body.addEventListener('htmx:afterSwap', function(event) {
+                if (event.detail.target.id === 'reports-content') {
+                    setTimeout(initCharts, 50);
+                }
+            });
+        }
+    </script>

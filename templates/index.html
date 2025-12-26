@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudHabit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // Get user_id from Telegram WebApp or URL parameters
+        function getUserId() {
+            // Try to get from Telegram WebApp
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user && user.id) {
+                    console.log('✅ User ID from Telegram:', user.id);
+                    return user.id.toString();
+                }
+            }
+            // If not available, get from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('user_id') || '{{ user_id }}';
+            console.log('ℹ️ User ID from URL/template:', userId);
+            return userId;
+        }
+        
+        // Initialize Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+        
+        // Save user_id in global variable
+        window.USER_ID = getUserId();
+        console.log('🔑 Using User ID:', window.USER_ID);
+        
+        // Update all forms and links with user_id
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update all forms
+            document.querySelectorAll('form').forEach(form => {
+                if (!form.querySelector('input[name="user_id"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'user_id';
+                    hiddenInput.value = window.USER_ID;
+                    form.appendChild(hiddenInput);
+                }
+            });
+            console.log('✅ Forms updated with user_id');
+        });
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-3xl font-bold text-center mb-8">CloudHabit☁️</h1>
+
+        <!-- Tabs -->
+        <div class="mb-8">
+            <div class="flex border-b border-gray-200">
+                <button id="tab-tasks" class="tab-button py-2 px-4 border-b-2 border-blue-500 text-blue-600 font-medium" data-tab="tasks">Habits</button>
+                <button id="tab-calendar" class="tab-button py-2 px-4 text-gray-500" data-tab="calendar">Calendar</button>
+                <button id="tab-reports" class="tab-button py-2 px-4 text-gray-500" data-tab="reports">Reports</button>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content">
+            <!-- Tasks Tab -->
+            <div id="tasks-content" class="tab-content">
+                <!-- Add Habit Form -->
+                <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+                    <h2 class="text-lg sm:text-xl font-semibold mb-4">Add New Habit</h2>
+                    <form hx-post="/habits" hx-target="#habits-list" hx-swap="innerHTML" hx-params="*">
+                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <input 
+                                type="text" 
+                                name="name" 
+                                placeholder="Habit name (e.g., Exercise, Reading)" 
+                                class="flex-1 px-4 py-3 sm:py-2.5 text-base sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
+                                required
+                                autocomplete="off"
+                            >
+                            <button 
+                                type="submit" 
+                                class="bg-blue-500 text-white px-6 py-3 sm:py-2.5 rounded-lg hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-base sm:text-sm font-medium min-h-[44px] sm:min-h-0"
+                            >
+                                Add Habit 📌
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Habits List -->
+                <div id="habits-list" hx-get="/habits-list?user_id={{ user_id }}" hx-trigger="habitChanged from:body" hx-swap="innerHTML" hx-params="none">
+                    <h2 class="text-xl font-semibold mb-4">My Habits ({{ habits|length }})</h2>
+                    {% if habits %}
+                        {% for habit in habits %}
+                        <div class="bg-white rounded-lg shadow p-4 mb-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-4 h-4 rounded-full" style="background-color: {{ habit.color }}"></div>
+                                    <span>{{ habit.name }}</span>
+                                </div>
+                                <button hx-delete="/habits/{{ habit.id }}?user_id={{ user_id }}" hx-target="#habits-list" hx-swap="innerHTML" class="text-red-500 hover:text-red-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Week Calendar -->
+                            <div class="grid grid-cols-7 gap-1">
+                                {% for i in range(7) %}
+                                <div class="flex flex-col items-center">
+                                    <span class="text-xs text-gray-500 mb-1">{{ week_names[i] }}</span>
+                                    {% set day_completed = habit.completions.get(week_days[i], False) %}
+                                    <form hx-post="/completions" hx-target="this" hx-swap="outerHTML" hx-params="*" enctype="application/x-www-form-urlencoded" style="display: inline-block; margin: 0;">
+                                        <input type="hidden" name="habit_id" value="{{ habit.id }}">
+                                        <input type="hidden" name="date" value="{{ week_days[i] }}">
+                                        <input type="hidden" name="context" value="week">
+                                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                                        <button 
+                                            type="submit"
+                                            class="w-10 h-10 rounded-lg flex items-center justify-center text-xs transition-all {% if day_completed %}text-white{% else %}bg-gray-200 hover:bg-gray-300{% endif %}"
+                                            style="{% if day_completed %}background-color: {{ habit.color }}{% endif %}"
+                                        >
+                                            {% if day_completed %}
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            {% else %}
+                                            {{ week_days[i].split('-')[2] }}
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                            No habits yet. Add your first habit to get started!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Calendar Tab -->
+            <div id="calendar-content" class="tab-content hidden" hx-get="/calendar?user_id={{ user_id }}" hx-trigger="revealed, calendarTabClicked, habitChanged from:body" hx-swap="innerHTML" hx-params="none">
+                <!-- Calendar will be loaded here -->
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports-content" class="tab-content hidden" hx-get="/reports?user_id={{ user_id }}" hx-trigger="revealed, reportsTabClicked, habitChanged from:body" hx-swap="innerHTML" hx-params="none">
+                <!-- Reports will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+
+                    // Remove active class from all buttons
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600', 'font-medium');
+                        btn.classList.add('text-gray-500');
+                    });
+
+                    // Add active class to clicked button
+                    this.classList.add('border-b-2', 'border-blue-500', 'text-blue-600', 'font-medium');
+                    this.classList.remove('text-gray-500');
+
+                    // Hide all tab contents
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+
+                    // Show selected tab content
+                    const activeContent = document.getElementById(tabName + '-content');
+                    if (activeContent) {
+                        activeContent.classList.remove('hidden');
+                        // Trigger HTMX load for the tab (always trigger to refresh data)
+                        // Use setTimeout to ensure the element is visible before triggering
+                        setTimeout(() => {
+                            if (tabName === 'calendar') {
+                                const calendarContent = document.getElementById('calendar-content');
+                                if (calendarContent && typeof htmx !== 'undefined') {
+                                    // Always trigger to refresh calendar data when tab is opened
+                                    htmx.trigger(calendarContent, 'calendarTabClicked');
+                                }
+                            } else if (tabName === 'reports') {
+                                const reportsContent = document.getElementById('reports-content');
+                                if (reportsContent && typeof htmx !== 'undefined') {
+                                    // Always trigger to refresh reports data when tab is opened
+                                    htmx.trigger(reportsContent, 'reportsTabClicked');
+                                }
+                            }
+                        }, 10);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
