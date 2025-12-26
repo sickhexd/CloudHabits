@@ -1,6 +1,7 @@
 """
 Module for Telegram Mini Apps authentication
 """
+
 from fastapi import Request, HTTPException, Query
 from typing import Optional
 import urllib.parse
