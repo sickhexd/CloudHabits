@@ -71,9 +71,10 @@ def get_all_habits(db: Session, user_id: str) -> List[dict]:
             "id": habit.id,
             "name": habit.name,
             "color": habit.color,
-            "created_at": habit.created_at.isoformat()
+            "created_at": (habit.created_at.isoformat()
             if habit.created_at
-            else datetime.datetime.now().isoformat(),
+            else datetime.datetime.now().isoformat()
+            ),
         }
         for habit in habits
     ]
@@ -91,9 +92,10 @@ def get_habit_by_id(db: Session, user_id: str, habit_id: str) -> dict:
             "id": habit.id,
             "name": habit.name,
             "color": habit.color,
-            "created_at": habit.created_at.isoformat()
+            "created_at": (habit.created_at.isoformat()
             if habit.created_at
-            else datetime.datetime.now().isoformat(),
+            else datetime.datetime.now().isoformat()
+            ),
         }
     return None
 

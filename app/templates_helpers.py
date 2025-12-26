@@ -1,4 +1,5 @@
 """Helper functions for HTML generation"""
+
 from typing import Dict
 from datetime import date as date_type
 import datetime

@@ -2,6 +2,7 @@
 Database migration script: adding user_id field
 Run this script once to update existing database
 """
+
 import sys
 import os
 

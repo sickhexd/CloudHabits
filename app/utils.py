@@ -1,4 +1,5 @@
 """Utilities for working with dates and calendar"""
+
 from datetime import date, timedelta
 from typing import List, Tuple
 import calendar
