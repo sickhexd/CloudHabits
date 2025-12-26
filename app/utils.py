@@ -1,9 +1,8 @@
 """Utilities for working with dates and calendar"""
 
+import calendar
 from datetime import date, timedelta
 from typing import List, Tuple
-import calendar
-
 
 WEEK_DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 HABIT_COLORS = [

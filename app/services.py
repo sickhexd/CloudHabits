@@ -1,9 +1,11 @@
 """Services for application business logic"""
 
-from typing import List, Dict, Set
 from datetime import date
+from typing import Dict, List, Set
+
 from sqlalchemy.orm import Session
-from app.database import HabitModel, CompletionModel, get_all_habits
+
+from app.database import CompletionModel, HabitModel, get_all_habits
 
 
 def get_completions_batch(

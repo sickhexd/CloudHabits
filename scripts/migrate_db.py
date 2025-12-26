@@ -3,13 +3,14 @@ Database migration script: adding user_id field
 Run this script once to update existing database
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy import text
-from app.database import engine, SessionLocal
+
+from app.database import SessionLocal, engine
 
 
 def migrate_database():

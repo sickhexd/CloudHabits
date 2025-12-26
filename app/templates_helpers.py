@@ -1,8 +1,8 @@
 """Helper functions for HTML generation"""
 
-from typing import Dict
-from datetime import date as date_type
 import datetime
+from datetime import date as date_type
+from typing import Dict
 
 
 def generate_completion_button(

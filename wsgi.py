@@ -1,5 +1,6 @@
-import sys
 import os
+import sys
+
 from app.main import app
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

@@ -1,39 +1,38 @@
-from fastapi import FastAPI, Request, Form, Depends, Query, HTTPException
+from datetime import date
+from pathlib import Path
+from typing import Optional
+
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from typing import Optional
-from datetime import date
-from app.templates_helpers import generate_completion_button
-from app.telegram_auth import get_user_id_dependency
-from dotenv import load_dotenv
-from pathlib import Path
-
 
 from app.database import (
-    get_db,
-    HabitModel,
     CompletionModel,
+    HabitModel,
     get_all_habits,
+    get_db,
     get_habit_by_id,
     get_habits_count_by_user,
     get_max_habit_number_by_user,
 )
-from app.utils import (
-    get_week_days,
-    get_week_day_names,
-    get_calendar_data,
-    get_period_dates,
-    format_date_for_display,
-    get_habit_color,
-)
 from app.services import (
-    enrich_habits_with_completions,
-    calculate_streaks,
     calculate_completion_rate,
+    calculate_streaks,
+    enrich_habits_with_completions,
     get_completions_batch,
 )
-
+from app.telegram_auth import get_user_id_dependency
+from app.templates_helpers import generate_completion_button
+from app.utils import (
+    format_date_for_display,
+    get_calendar_data,
+    get_habit_color,
+    get_period_dates,
+    get_week_day_names,
+    get_week_days,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / ".env"

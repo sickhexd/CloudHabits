@@ -2,14 +2,15 @@
 Module for Telegram Mini Apps authentication
 """
 
-from fastapi import Request, HTTPException, Query
-from typing import Optional
-import urllib.parse
-import hmac
 import hashlib
-import time
+import hmac
 import json
 import os
+import time
+import urllib.parse
+from typing import Optional
+
+from fastapi import HTTPException, Query, Request
 
 
 def get_user_id_from_query(request: Request) -> str:
