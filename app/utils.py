@@ -4,7 +4,7 @@ from typing import List, Tuple
 import calendar
 
 
-WEEK_DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+WEEK_DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 HABIT_COLORS = [
     "#3b82f6",  # Bright blue
     "#10b981",  # Vibrant green
@@ -13,12 +13,22 @@ HABIT_COLORS = [
     "#ef4444",  # Bold red
     "#06b6d4",  # Bright cyan
     "#ec4899",  # Vibrant pink
-    "#f97316"   # Warm orange-red
+    "#f97316",  # Warm orange-red
 ]
 
 MONTH_NAMES = {
-    1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
-    7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "May",
+    6: "Jun",
+    7: "Jul",
+    8: "Aug",
+    9: "Sep",
+    10: "Oct",
+    11: "Nov",
+    12: "Dec",
 }
 
 
@@ -44,7 +54,7 @@ def get_calendar_data(year: int, month: int) -> Tuple[List[List[int]], str]:
 def get_period_dates(period: str) -> List[date]:
     """Returns list of dates for specified period"""
     today = date.today()
-    
+
     if period == "7days":
         start_date = today - timedelta(days=6)
         return [start_date + timedelta(days=i) for i in range(7)]
@@ -75,4 +85,3 @@ def format_date_for_display(d: date) -> str:
 def get_habit_color(habit_index: int) -> str:
     """Returns color for habit by index"""
     return HABIT_COLORS[habit_index % len(HABIT_COLORS)]
-
