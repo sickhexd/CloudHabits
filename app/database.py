@@ -1,7 +1,6 @@
 import datetime
 import os
 from pathlib import Path
-from typing import List
 
 from sqlalchemy import Column, DateTime, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -63,7 +62,7 @@ def is_completed(db: Session, user_id: str, habit_id: str, date_str: str) -> boo
     return completion is not None
 
 
-def get_all_habits(db: Session, user_id: str) -> List[dict]:
+def get_all_habits(db: Session, user_id: str) -> list[dict]:
     """Gets all user habits from database"""
     habits = db.query(HabitModel).filter(HabitModel.user_id == user_id).all()
     return [

@@ -2,7 +2,6 @@
 
 import calendar
 from datetime import date, timedelta
-from typing import List, Tuple
 
 WEEK_DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 HABIT_COLORS = [
@@ -32,26 +31,26 @@ MONTH_NAMES = {
 }
 
 
-def get_week_days() -> List[str]:
+def get_week_days() -> list[str]:
     """Returns list of dates for current week (starting from Monday)"""
     today = date.today()
     start_of_week = today - timedelta(days=today.weekday())
     return [(start_of_week + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
 
 
-def get_week_day_names() -> List[str]:
+def get_week_day_names() -> list[str]:
     """Returns week day names"""
     return WEEK_DAY_NAMES.copy()
 
 
-def get_calendar_data(year: int, month: int) -> Tuple[List[List[int]], str]:
+def get_calendar_data(year: int, month: int) -> tuple[list[list[int]], str]:
     """Returns calendar data for specified year and month"""
     cal = calendar.monthcalendar(year, month)
     month_name = calendar.month_name[month]
     return cal, month_name
 
 
-def get_period_dates(period: str) -> List[date]:
+def get_period_dates(period: str) -> list[date]:
     """Returns list of dates for specified period"""
     today = date.today()
 

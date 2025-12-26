@@ -1,8 +1,6 @@
 """Helper functions for HTML generation"""
 
 import datetime
-from datetime import date as date_type
-from typing import Dict
 
 
 def generate_completion_button(
@@ -10,9 +8,9 @@ def generate_completion_button(
     date: str,
     context: str,
     completed: bool,
-    habit: Dict,
+    habit: dict,
     day_num: int,
-    user_id: str = None,
+    user_id: str | None = None,
 ) -> str:
     """Generates HTML for habit completion button"""
     today = datetime.date.today().strftime("%Y-%m-%d")

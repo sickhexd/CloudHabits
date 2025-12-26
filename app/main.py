@@ -1,6 +1,5 @@
 from datetime import date
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
@@ -66,7 +65,7 @@ async def log_completions_requests(request: Request, call_next):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(
-    request: Request, user_id: Optional[str] = Query(None), db: Session = Depends(get_db)
+    request: Request, user_id: str | None = Query(None), db: Session = Depends(get_db)
 ):
     """Main page with weekly calendar"""
     if not user_id:
@@ -137,7 +136,7 @@ async def read_root(
                     }
                     return null;
                 }
-                
+
                 // Wait for Telegram SDK to initialize
                 setTimeout(() => {
                     const userId = getUserId();
@@ -203,8 +202,8 @@ async def get_habits_list(
 async def get_calendar(
     request: Request,
     user_id: str = Depends(get_user_id_dependency),
-    year: Optional[int] = None,
-    month: Optional[int] = None,
+    year: int | None = None,
+    month: int | None = None,
     db: Session = Depends(get_db),
 ):
     """Page with monthly calendar"""
@@ -447,12 +446,12 @@ async def toggle_completion(request: Request, db: Session = Depends(get_db)):
                     f"[DEBUG /completions] Parsed values: habit_id={habit_id}, date={date}, context={context}, user_id={user_id}"
                 )
             else:
-                logger.error(f"[DEBUG /completions] Body is empty!")
+                logger.error("[DEBUG /completions] Body is empty!")
         except Exception as e:
-            logger.error(f"[DEBUG /completions] Error reading/parsing body: {e}")
+            logger.exception(f"[DEBUG /completions] Error reading/parsing body: {e}")
             import traceback
 
-            logger.error(f"[DEBUG /completions] Traceback: {traceback.format_exc()}")
+            logger.exception(f"[DEBUG /completions] Traceback: {traceback.format_exc()}")
 
         if not habit_id or not date or not user_id:
             logger.error(
@@ -465,8 +464,8 @@ async def toggle_completion(request: Request, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"[DEBUG /completions] Error parsing form: {e}")
-        raise HTTPException(status_code=422, detail=f"Error parsing form data: {str(e)}")
+        logger.exception(f"[DEBUG /completions] Error parsing form: {e}")
+        raise HTTPException(status_code=422, detail=f"Error parsing form data: {e!s}")
 
     if context is None:
         context = "week"

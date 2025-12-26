@@ -1,16 +1,15 @@
 """Services for application business logic"""
 
 from datetime import date
-from typing import Dict, List, Set
 
 from sqlalchemy.orm import Session
 
-from app.database import CompletionModel, HabitModel, get_all_habits
+from app.database import CompletionModel
 
 
 def get_completions_batch(
-    db: Session, user_id: str, habit_ids: List[str], dates: List[str]
-) -> Dict[tuple, bool]:
+    db: Session, user_id: str, habit_ids: list[str], dates: list[str]
+) -> dict[tuple, bool]:
     """
     Optimized function to get completions in one query.
     Returns dictionary {(habit_id, date): True/False}
@@ -39,8 +38,8 @@ def get_completions_batch(
 
 
 def enrich_habits_with_completions(
-    db: Session, user_id: str, habits: List[Dict], dates: List[str]
-) -> List[Dict]:
+    db: Session, user_id: str, habits: list[dict], dates: list[str]
+) -> list[dict]:
     if not habits:
         return []
 
@@ -58,8 +57,8 @@ def enrich_habits_with_completions(
 
 
 def calculate_streaks(
-    db: Session, user_id: str, habit_id: str, dates: List[date]
-) -> Dict[str, int]:
+    db: Session, user_id: str, habit_id: str, dates: list[date]
+) -> dict[str, int]:
     """
     Calculates current and maximum streaks for habit.
     Returns {'current_streak': int, 'max_streak': int}
@@ -103,7 +102,7 @@ def calculate_streaks(
     return {"current_streak": current_streak, "max_streak": max_streak}
 
 
-def calculate_completion_rate(db: Session, user_id: str, habit_id: str, dates: List[date]) -> int:
+def calculate_completion_rate(db: Session, user_id: str, habit_id: str, dates: list[date]) -> int:
     """Calculates habit completion rate for period"""
     if not dates:
         return 0
