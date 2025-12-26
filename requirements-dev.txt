@@ -1,15 +1,15 @@
 # Development dependencies for CI/CD pipeline
 
 # Code formatting
-black==23.12.1
+black>=24.0.0
 isort==5.13.2
 
 # Linting
-ruff==0.1.9
+ruff>=0.1.9
 
 # Security
 bandit==1.7.6
-safety==2.3.5
+safety>=3.0.0
 
 # Testing (optional, для будущих тестов)
 pytest==7.4.4
@@ -22,4 +22,3 @@ types-python-dateutil==2.8.19.14
 
 # Pre-commit hooks (optional)
 pre-commit==3.6.0
-

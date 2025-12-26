@@ -9,8 +9,6 @@ import hashlib
 import time
 import json
 import os
-import jsonimport os
-import json
 
 
 def get_user_id_from_query(request: Request) -> str:
